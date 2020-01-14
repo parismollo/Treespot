@@ -102,5 +102,27 @@ def find_best_split(rows):
                 best_gain, best_question = gain, question
     return best_gain, best_question
 
-best_gain, best_question = find_best_split(training_data)
-print(f'Here is the best gain {best_gain} with this question {best_question}')
+# best_gain, best_question = find_best_split(training_data)
+# print(f'Here is the best gain {best_gain} with this question {best_question}')
+
+
+class Leaf:
+    def __init__(self, rows):
+        self.predictions = class_counts(rows)
+
+class Decision_Node:
+    def __init__(self, question, true_branch, false_branch):
+        self.question = question
+        self.true_branch = true_branch
+        self.false_branch = false_branch
+
+def build_tree(rows):
+    gain, question = find_best_split(rows)
+    if gain == 0:
+        return Leaf(rows)
+
+    true_rows, false_rows = partition(rows, question)
+    true_branch = build_tree(true_rows)
+    false_branch = build_tree(false_rows)
+    
+    return Decision_Node(question, true_branch, false_branch)
