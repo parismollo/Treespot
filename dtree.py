@@ -1,25 +1,8 @@
 import streamlit as st
 import pandas as pd
 
-st.title('DTrees - Classifier')
-st.write('**Data**')
-
-training_data = [
-    ['Green', 3, 'Apple'],
-    ['Yellow', 3, 'Apple'],
-    ['Red', 1, 'Grape'],
-    ['Red', 1, 'Grape'],
-    ['Yellow', 3, 'Lemon']
-]
-header = ['color', 'diameter', 'label']
-
-df = pd.DataFrame(training_data, columns=header)
-st.write(df)
-
 def unique_values(rows, col):
     return set([row[col] for row in rows])
-
-# print(unique_values(training_data, 0))
 
 def class_counts(rows):
     counts = {}
@@ -30,12 +13,11 @@ def class_counts(rows):
         counts[label]+=1
     return counts
 
-# print(class_counts(training_data))
 
 def is_numeric(value):
     return isinstance(value, int) or isinstance(value, float)
 
-# print(is_numeric(9))
+
 
 class Question:
     def __init__(self, column, value):
@@ -73,12 +55,6 @@ def gini(rows):
         impurity -=prob_of_lbl**2
     return impurity
 
-no_mixing = [
-    ['Apple'],
-    ['Apple']
-]
-print(gini(no_mixing))
-
 
 def info_gain(left, right, current_uncertainty):
     p = float(len(left)) / (len(left) + len(right))
@@ -102,10 +78,6 @@ def find_best_split(rows):
                 best_gain, best_question = gain, question
     return best_gain, best_question
 
-# best_gain, best_question = find_best_split(training_data)
-# print(f'Here is the best gain {best_gain} with this question {best_question}')
-
-
 class Leaf:
     def __init__(self, rows):
         self.predictions = class_counts(rows)
@@ -124,5 +96,41 @@ def build_tree(rows):
     true_rows, false_rows = partition(rows, question)
     true_branch = build_tree(true_rows)
     false_branch = build_tree(false_rows)
-    
+
     return Decision_Node(question, true_branch, false_branch)
+
+def print_tree(node, spacing=''):
+    if isinstance(node, Leaf):
+        print(spacing + 'Predict', node.predictions)
+        return
+    print(spacing + str(node.question))
+    print(spacing + '--> True:')
+    print_tree(node.true_branch, spacing + ' ')
+    print(spacing + '--> False:')
+    print_tree(node.false_branch, spacing + ' ')
+
+
+def classify(row, node):
+    if isinstance(node, Leaf):
+        return node.predictions
+    if node.question.match(row):
+        return classify(row, node.true_branch)
+    else:
+        return classify(row, node.false_branch)
+
+
+def print_leaf(counts):
+    total = sum(counts.values()) * 1.0
+    probs = {}
+    for lbl in counts.keys():
+        probs[lbl] = str(int(counts[lbl] / total * 100))+'%'
+    return probs
+
+
+def predict(data, header):
+    header = header
+    tree = build_tree(data)
+    for row in data:
+        print(f'Actual: {row[-1]}. Predicted: {print_leaf(classify(row, tree))}')
+    print('Tree:')
+    print_tree(tree)
