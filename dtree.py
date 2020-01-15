@@ -18,7 +18,6 @@ def is_numeric(value):
     return isinstance(value, int) or isinstance(value, float)
 
 
-
 class Question:
     def __init__(self, column, value):
         self.column = column
@@ -130,7 +129,8 @@ def print_leaf(counts):
 def predict(data, header):
     header = header
     tree = build_tree(data)
+    results = {}
     for row in data:
-        print(f'Actual: {row[-1]}. Predicted: {print_leaf(classify(row, tree))}')
-    print('Tree:')
-    print_tree(tree)
+        # print(f'Actual: {row[-1]}. Predicted: {print_leaf(classify(row, tree))}')
+        results[row[-1]] = print_leaf(classify(row, tree))
+    return results
