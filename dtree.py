@@ -1,6 +1,7 @@
 # import streamlit as st
 import pandas as pd
 
+
 def unique_values(rows, col):
     return set([row[col] for row in rows])
 
@@ -133,4 +134,8 @@ def predict(data, header):
     for row in data:
         # print(f'Actual: {row[-1]}. Predicted: {print_leaf(classify(row, tree))}')
         results[row[-1]] = print_leaf(classify(row, tree))
-    return results
+    return results, tree
+
+# results, tree = predict(data, header)
+# print(results)
+# print_tree(tree)
